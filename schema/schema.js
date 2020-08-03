@@ -1,7 +1,17 @@
-const graphql = require('graphql');
 const _ = require('lodash');
 
-const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLSchema, GraphQLList } = graphql;
+const Pokemon = require('../models/Pokemon');
+const Trainer = require('../models/Trainer');
+const Game = require('../models/Game');
+
+const graphql = require('graphql');
+const { 
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLSchema,
+    GraphQLList 
+} = graphql;
 
 const PokemonType = new GraphQLObjectType({
     name: 'Pokemon',
@@ -13,9 +23,9 @@ const PokemonType = new GraphQLObjectType({
         game: { 
             type: GameType,
             resolve(parent, args){
-                //
+                //query for games list
                 return _.find(
-                    //games,
+                    //games list,
                     { id : parent.gameId } 
                 );
             }
