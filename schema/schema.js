@@ -1,4 +1,4 @@
-const _ = require('lodash');
+// const _ = require('lodash');
 
 const Pokemon = require('../models/Pokemon');
 const Trainer = require('../models/Trainer');
@@ -23,11 +23,7 @@ const PokemonType = new GraphQLObjectType({
         game: { 
             type: GameType,
             resolve(parent, args){
-                //query for games list
-                return _.find(
-                    //games list,
-                    { id : parent.gameId } 
-                );
+                return Game.findById(parent.gameId);
             }
         },
     }),
@@ -41,10 +37,9 @@ const TrainerType = new GraphQLObjectType({
         games: {
             type: new GraphQLList(GameType),
             resolve(parent, args){
-                return _.filter(
-                    //games,
-                    {trainerId: parent.id}
-                )
+                return Game.find({
+                    trainerId: parent.id,
+                });
             }
         }
     }),
@@ -59,19 +54,15 @@ const GameType = new GraphQLObjectType({
         trainer: { 
             type: TrainerType,
             resolve(parent, args){
-                return _.find(
-                    //trainers,
-                    { id: parent.trainerId }
-                )
+                return Trainer.findById(parent.trainerId);
             }
         },
         pokemons: {
             type: new GraphQLList(PokemonType),
             resolve(parent, args){
-                return _.filter(
-                    //pokemons,
-                    { gameId: parent.id}
-                )
+                return Pokemon.find({
+                   gameId: parent.id, 
+                });
             }
         }
     }),
@@ -85,44 +76,111 @@ const Root = new GraphQLObjectType({
             type: PokemonType,
             args: { id: { type: GraphQLID }},
             resolve(parent, args){
-                //get data
+                return Pokemon.findById(args.id);
             }
         },
         trainer: {
             type: TrainerType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args){
-                //get data
+                return Trainer.findById(args.id);
+            }
+        },
+        trainer_by_name: {
+            type: new GraphQLList(TrainerType),
+            args: { name: { type: GraphQLString } },
+            resolve(parent, args){
+                return Trainer.find({name: args.name});
             }
         },
         game: {
             type: GameType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args){
-                //get data
+                return Game.findById(args.id);
             }
         },
         pokemons :{
             type: new GraphQLList(PokemonType),
             resolve(parent, args){
-                //return pokemons
+                return Pokemon.find({});
             }
         },
         trainers :{
-            type: new GraphQLList(PokemonType),
+            type: new GraphQLList(TrainerType),
             resolve(parent, args){
-                //return trainers
+                return Trainer.find({});
             }
         },
         games :{
-            type: new GraphQLList(PokemonType),
+            type: new GraphQLList(GameType),
             resolve(parent, args){
-                //return games
+                return Game.find({});
             }
         }
     }
 });
 
+const Mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        addPokemon: {
+            type: PokemonType,
+            args: {
+                name: { type: GraphQLString },
+                img: { type: GraphQLString },
+                species: { type: GraphQLString },
+                gameId: { type: GraphQLID }
+            },
+            resolve(parent, args){
+                let poke = new Pokemon({
+                    name: args.name,
+                    img: args.img,
+                    species: args.species,
+                    gameId: args.gameId,
+                });
+
+                return poke.save();
+            }
+        },
+        addGame: {
+            type: GameType,
+            args: {
+                type_of_game: { type: GraphQLString },
+                version: { type: GraphQLString },
+                trainerId: { type: GraphQLID }
+            },
+            resolve(parent, args){
+                let gam = new Game({
+                    type_of_game: args.type_of_game,
+                    version: args.version,
+                    trainerId: args.trainerId,
+
+                });
+                
+                return gam.save();
+            }
+        }
+        
+        ,
+
+        addTrainer: {
+            type: TrainerType,
+            args: {
+                name: { type: GraphQLString },
+            },
+            resolve(parent, args){
+                let train = new Trainer({
+                    name: args.name,
+                });
+
+                return train.save();
+            }
+        }
+    }
+})
+
 module.exports = new graphql.GraphQLSchema({
     query: Root,
+    mutation: Mutation,
 });
