@@ -10,7 +10,8 @@ const {
     GraphQLString,
     GraphQLID,
     GraphQLSchema,
-    GraphQLList 
+    GraphQLList,
+    GraphQLNonNull 
 } = graphql;
 
 const PokemonType = new GraphQLObjectType({
@@ -127,10 +128,10 @@ const Mutation = new GraphQLObjectType({
         addPokemon: {
             type: PokemonType,
             args: {
-                name: { type: GraphQLString },
-                img: { type: GraphQLString },
-                species: { type: GraphQLString },
-                gameId: { type: GraphQLID }
+                name: { type:new GraphQLNonNull(GraphQLString)  },
+                img: { type: new GraphQLNonNull(GraphQLString) },
+                species: { type: new GraphQLNonNull(GraphQLString) },
+                gameId: { type: new GraphQLNonNull(GraphQLID) }
             },
             resolve(parent, args){
                 let poke = new Pokemon({
@@ -146,9 +147,9 @@ const Mutation = new GraphQLObjectType({
         addGame: {
             type: GameType,
             args: {
-                type_of_game: { type: GraphQLString },
-                version: { type: GraphQLString },
-                trainerId: { type: GraphQLID }
+                type_of_game: { type: new GraphQLNonNull(GraphQLString) },
+                version: { type: new GraphQLNonNull(GraphQLString) },
+                trainerId: { type: new GraphQLNonNull(GraphQLID) }
             },
             resolve(parent, args){
                 let gam = new Game({
@@ -167,7 +168,7 @@ const Mutation = new GraphQLObjectType({
         addTrainer: {
             type: TrainerType,
             args: {
-                name: { type: GraphQLString },
+                name: { type: new GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args){
                 let train = new Trainer({
